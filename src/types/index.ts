@@ -3,6 +3,8 @@ export interface User {
   id: string;
   username: string;
   email: string;
+  fullName?: string;
+  avatar?: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -26,6 +28,42 @@ export interface Magazine {
   description?: string;
   content?: string;
   category?: string;
+}
+
+// New types for API integration
+export interface Zone {
+  id: string;
+  name: string;
+  description?: string;
+  order?: number;
+}
+
+export interface Content {
+  id: string;
+  title: string;
+  description?: string;
+  content?: string;
+  image?: string;
+  publishedAt: string;
+  zoneId: string;
+  author?: string;
+  tags?: string[];
+  viewCount?: number;
+  isPopular?: boolean;
+}
+
+export interface RegisterForm {
+  email: string;
+  password: string;
+  username: string;
+  fullName: string;
+}
+
+export interface UpdateProfileForm {
+  username?: string;
+  fullName?: string;
+  email?: string;
+  avatar?: string;
 }
 
 export interface SocialLink {

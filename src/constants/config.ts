@@ -16,6 +16,13 @@ export const API_CONFIG = {
   retryAttempts: 3,
 } as const;
 
+// Device fingerprint for API requests
+export const getDeviceFingerprint = (): string => {
+  // Generate a simple device fingerprint
+  // In production, you might want to use a more sophisticated approach
+  return `device-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+};
+
 export const STORAGE_CONFIG = {
   encryptionKey: process.env.EXPO_PUBLIC_ENCRYPTION_KEY || 'default-key',
   maxCacheSize: 50 * 1024 * 1024, // 50MB

@@ -1,60 +1,55 @@
-import { apiService, API_ENDPOINTS, getPaginatedData } from './api';
-import { Magazine, PaginatedResponse, ApiResponse } from '../types';
+import { contentsService } from './contents';
+import { zonesService } from './zones';
+import { Magazine, PaginatedResponse, ApiResponse, Content, Zone } from '../types';
 
 /**
  * Magazine service for handling magazine-related API calls
  */
 export class MagazineService {
   /**
-   * Get paginated list of magazines
+   * Get paginated list of magazines (using contents from first zone)
    */
   async getMagazines(page = 1, limit = 20): Promise<ApiResponse<PaginatedResponse<Magazine>>> {
     try {
-      // For now, return mock data
-      // Replace with actual API call when backend is ready
-      const mockMagazines: Magazine[] = [
-        {
-          id: '1',
-          title: 'Khoa học và Đời sống',
-          issue: 'số 33',
-          date: '14/8/2025',
-          cover: 'https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=300&h=400&fit=crop',
-          isLatest: true,
-          description: 'Tạp chí khoa học hàng đầu Việt Nam',
-          category: 'science',
-        },
-        {
-          id: '2',
-          title: 'Khoa học và Đời sống',
-          issue: 'số 32',
-          date: '7/8/2025',
-          cover: 'https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=300&h=400&fit=crop',
-          description: 'Khám phá những điều kỳ diệu của khoa học',
-          category: 'science',
-        },
-        {
-          id: '3',
-          title: 'Khoa học và Đời sống',
-          issue: 'số 31',
-          date: '31/7/2025',
-          cover: 'https://images.unsplash.com/photo-1495020689067-958852a7765e?w=300&h=400&fit=crop',
-          description: 'Ứng dụng khoa học trong cuộc sống',
-          category: 'science',
-        },
-      ];
+      // Get zones first
+      const zones = await zonesService.fetchZones();
+      if (zones.length === 0) {
+        return {
+          success: false,
+          error: 'No zones available',
+        };
+      }
 
-      const startIndex = (page - 1) * limit;
-      const endIndex = startIndex + limit;
-      const paginatedData = mockMagazines.slice(startIndex, endIndex);
+      // Get contents from the first zone
+      const firstZone = zones[0];
+      const contents = await contentsService.fetchContents(firstZone.id, page, limit);
+      
+      // Convert contents to magazines format
+      const magazines: Magazine[] = contents.map((content: Content) => ({
+        id: content.id,
+        title: content.title,
+        issue: `Số ${content.id}`,
+        date: new Date(content.publishedAt).toLocaleDateString('vi-VN'),
+        cover: content.image || 'https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=300&h=400&fit=crop',
+        isLatest: false,
+        description: content.description,
+        content: content.content,
+        category: firstZone.name.toLowerCase(),
+      }));
+
+      // Mark the first one as latest
+      if (magazines.length > 0 && page === 1) {
+        magazines[0].isLatest = true;
+      }
 
       return {
         success: true,
         data: {
-          data: paginatedData,
-          total: mockMagazines.length,
+          data: magazines,
+          total: magazines.length * 10, // Estimate total
           page,
           limit,
-          hasMore: endIndex < mockMagazines.length,
+          hasMore: magazines.length === limit,
         },
       };
     } catch (error) {
@@ -67,26 +62,33 @@ export class MagazineService {
   }
 
   /**
-   * Get magazine by ID
+   * Get magazine by ID (using content detail)
    */
   async getMagazineById(id: string): Promise<ApiResponse<Magazine>> {
     try {
-      // Mock data for now
-      const mockMagazine: Magazine = {
-        id,
-        title: 'Khoa học và Đời sống',
-        issue: 'số 33',
-        date: '14/8/2025',
-        cover: 'https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=300&h=400&fit=crop',
-        isLatest: true,
-        description: 'Tạp chí khoa học hàng đầu Việt Nam với những bài viết chất lượng cao về khoa học và công nghệ.',
-        content: 'Nội dung chi tiết của tạp chí...',
+      const content = await contentsService.fetchContentDetail(id);
+      if (!content) {
+        return {
+          success: false,
+          error: 'Magazine not found',
+        };
+      }
+
+      const magazine: Magazine = {
+        id: content.id,
+        title: content.title,
+        issue: `Số ${content.id}`,
+        date: new Date(content.publishedAt).toLocaleDateString('vi-VN'),
+        cover: content.image || 'https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=300&h=400&fit=crop',
+        isLatest: false,
+        description: content.description,
+        content: content.content,
         category: 'science',
       };
 
       return {
         success: true,
-        data: mockMagazine,
+        data: magazine,
       };
     } catch (error) {
       console.error('Error getting magazine by ID:', error);
@@ -98,20 +100,39 @@ export class MagazineService {
   }
 
   /**
-   * Get latest magazines
+   * Get latest magazines (using most read contents)
    */
   async getLatestMagazines(limit = 10): Promise<ApiResponse<Magazine[]>> {
     try {
-      const response = await this.getMagazines(1, limit);
-      if (response.success && response.data) {
+      // Get zones first
+      const zones = await zonesService.fetchZones();
+      if (zones.length === 0) {
         return {
-          success: true,
-          data: response.data.data,
+          success: false,
+          error: 'No zones available',
         };
       }
+
+      // Get most read contents from the first zone
+      const firstZone = zones[0];
+      const contents = await contentsService.fetchMostReadContents(firstZone.id, limit);
+      
+      // Convert contents to magazines format
+      const magazines: Magazine[] = contents.map((content: Content) => ({
+        id: content.id,
+        title: content.title,
+        issue: `Số ${content.id}`,
+        date: new Date(content.publishedAt).toLocaleDateString('vi-VN'),
+        cover: content.image || 'https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=300&h=400&fit=crop',
+        isLatest: true,
+        description: content.description,
+        content: content.content,
+        category: firstZone.name.toLowerCase(),
+      }));
+
       return {
-        success: false,
-        error: 'Failed to fetch latest magazines',
+        success: true,
+        data: magazines,
       };
     } catch (error) {
       console.error('Error getting latest magazines:', error);
@@ -172,7 +193,7 @@ export class MagazineService {
   }
 
   /**
-   * Search magazines
+   * Search magazines (using content search)
    */
   async searchMagazines(
     query: string,
@@ -180,34 +201,40 @@ export class MagazineService {
     limit = 20
   ): Promise<ApiResponse<PaginatedResponse<Magazine>>> {
     try {
-      // Mock search functionality
-      const allMagazines = await this.getMagazines(1, 100);
-      if (!allMagazines.success || !allMagazines.data) {
+      // Get zones first
+      const zones = await zonesService.fetchZones();
+      if (zones.length === 0) {
         return {
           success: false,
-          error: 'Failed to search magazines',
+          error: 'No zones available',
         };
       }
 
-      const filteredMagazines = allMagazines.data.data.filter(
-        (magazine) =>
-          magazine.title.toLowerCase().includes(query.toLowerCase()) ||
-          magazine.issue.toLowerCase().includes(query.toLowerCase()) ||
-          magazine.description?.toLowerCase().includes(query.toLowerCase())
-      );
-
-      const startIndex = (page - 1) * limit;
-      const endIndex = startIndex + limit;
-      const paginatedResults = filteredMagazines.slice(startIndex, endIndex);
+      // Search contents from the first zone
+      const firstZone = zones[0];
+      const contents = await contentsService.searchContents(query, page, limit, firstZone.id);
+      
+      // Convert contents to magazines format
+      const magazines: Magazine[] = contents.map((content: Content) => ({
+        id: content.id,
+        title: content.title,
+        issue: `Số ${content.id}`,
+        date: new Date(content.publishedAt).toLocaleDateString('vi-VN'),
+        cover: content.image || 'https://images.unsplash.com/photo-1586953208448-b95a79798f07?w=300&h=400&fit=crop',
+        isLatest: false,
+        description: content.description,
+        content: content.content,
+        category: firstZone.name.toLowerCase(),
+      }));
 
       return {
         success: true,
         data: {
-          data: paginatedResults,
-          total: filteredMagazines.length,
+          data: magazines,
+          total: magazines.length * 10, // Estimate total
           page,
           limit,
-          hasMore: endIndex < filteredMagazines.length,
+          hasMore: magazines.length === limit,
         },
       };
     } catch (error) {

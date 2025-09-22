@@ -1,5 +1,5 @@
 import { API_CONFIG } from '../constants/config';
-import { ApiResponse, PaginatedResponse } from '../types';
+import { PaginatedResponse } from '../types';
 
 /**
  * Base API service with common functionality
@@ -19,8 +19,8 @@ class ApiService {
     endpoint: string,
     options: RequestInit = {},
     attempt = 1
-  ): Promise<ApiResponse<T>> {
-    const url = `${this.baseUrl}${endpoint}`;
+  ): Promise<T> {
+    const url = endpoint.startsWith('http') ? endpoint : `${this.baseUrl}/${endpoint}`;
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), this.timeout);
 
@@ -41,7 +41,7 @@ class ApiService {
       }
 
       const data = await response.json();
-      return { success: true, data };
+      return data;
     } catch (error) {
       clearTimeout(timeoutId);
       
@@ -51,14 +51,11 @@ class ApiService {
       }
 
       console.error(`API request failed: ${endpoint}`, error);
-      return {
-        success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
-      };
+      throw error;
     }
   }
 
-  async get<T>(endpoint: string, headers?: Record<string, string>): Promise<ApiResponse<T>> {
+  async get<T>(endpoint: string, headers?: Record<string, string>): Promise<T> {
     return this.request<T>(endpoint, { method: 'GET', headers });
   }
 
@@ -66,7 +63,7 @@ class ApiService {
     endpoint: string,
     data?: any,
     headers?: Record<string, string>
-  ): Promise<ApiResponse<T>> {
+  ): Promise<T> {
     return this.request<T>(endpoint, {
       method: 'POST',
       body: data ? JSON.stringify(data) : undefined,
@@ -78,7 +75,7 @@ class ApiService {
     endpoint: string,
     data?: any,
     headers?: Record<string, string>
-  ): Promise<ApiResponse<T>> {
+  ): Promise<T> {
     return this.request<T>(endpoint, {
       method: 'PUT',
       body: data ? JSON.stringify(data) : undefined,
@@ -86,7 +83,7 @@ class ApiService {
     });
   }
 
-  async delete<T>(endpoint: string, headers?: Record<string, string>): Promise<ApiResponse<T>> {
+  async delete<T>(endpoint: string, headers?: Record<string, string>): Promise<T> {
     return this.request<T>(endpoint, { method: 'DELETE', headers });
   }
 
@@ -94,7 +91,7 @@ class ApiService {
     endpoint: string,
     data?: any,
     headers?: Record<string, string>
-  ): Promise<ApiResponse<T>> {
+  ): Promise<T> {
     return this.request<T>(endpoint, {
       method: 'PATCH',
       body: data ? JSON.stringify(data) : undefined,
@@ -112,6 +109,40 @@ class ApiService {
   }
 }
 
+// Create a singleton instance that matches your API structure
+class APIClient {
+  private apiService: ApiService;
+
+  constructor() {
+    this.apiService = new ApiService();
+  }
+
+  async get<T>(endpoint: string, headers?: Record<string, string>): Promise<T> {
+    return this.apiService.get<T>(endpoint, headers);
+  }
+
+  async post<T>(
+    endpoint: string,
+    data?: any,
+    options?: { headers?: Record<string, string> }
+  ): Promise<T> {
+    return this.apiService.post<T>(endpoint, data, options?.headers);
+  }
+
+  async put<T>(
+    endpoint: string,
+    data?: any,
+    options?: { headers?: Record<string, string> }
+  ): Promise<T> {
+    return this.apiService.put<T>(endpoint, data, options?.headers);
+  }
+
+  async delete<T>(endpoint: string, headers?: Record<string, string>): Promise<T> {
+    return this.apiService.delete<T>(endpoint, headers);
+  }
+}
+
+export const API = new APIClient();
 export const apiService = new ApiService();
 
 /**
@@ -119,29 +150,21 @@ export const apiService = new ApiService();
  */
 export const API_ENDPOINTS = {
   auth: {
-    login: '/auth/login',
-    logout: '/auth/logout',
-    refresh: '/auth/refresh',
-    profile: '/auth/profile',
+    login: 'users/post/login',
+    logout: 'users/post/logout',
+    register: 'users/post/register',
+    info: 'users/post/info',
+    resetPassword: 'users/post/reset-password',
+    updateProfile: 'users/post/update-profile',
   },
-  magazines: {
-    list: '/magazines',
-    detail: (id: string) => `/magazines/${id}`,
-    latest: '/magazines/latest',
-    popular: '/magazines/popular',
-    search: '/magazines/search',
+  zones: {
+    getContentDetail: 'api/zone/get/content_detail',
   },
-  profiles: {
-    list: '/profiles',
-    create: '/profiles',
-    update: (id: string) => `/profiles/${id}`,
-    delete: (id: string) => `/profiles/${id}`,
-  },
-  subscriptions: {
-    plans: '/subscriptions/plans',
-    subscribe: '/subscriptions/subscribe',
-    cancel: '/subscriptions/cancel',
-    status: '/subscriptions/status',
+  contents: {
+    getByZone: (zoneId: string, pageIndex: number) => `morenews-zone-${zoneId}-${pageIndex}.html`,
+    getMostRead: (zoneId: string) => `morenews-mostread-${zoneId}-1.html`,
+    search: (zoneId: string, pageIndex: number) => `morenews-search-${zoneId}-${pageIndex}.html`,
+    getById: 'contents/get/by-id',
   },
 } as const;
 
@@ -152,7 +175,7 @@ export const getPaginatedData = async <T>(
   endpoint: string,
   page = 1,
   limit = 20
-): Promise<ApiResponse<PaginatedResponse<T>>> => {
+): Promise<PaginatedResponse<T>> => {
   const url = `${endpoint}?page=${page}&limit=${limit}`;
   return apiService.get<PaginatedResponse<T>>(url);
 };

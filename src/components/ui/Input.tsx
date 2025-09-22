@@ -9,7 +9,7 @@ import {
   ViewStyle,
 } from 'react-native';
 import { Eye, EyeOff } from 'lucide-react-native';
-import { theme } from '@/constants/theme';
+import { theme } from '../../constants/theme';
 
 interface InputProps extends TextInputProps {
   label?: string;

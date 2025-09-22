@@ -1,7 +1,7 @@
 import { Platform } from 'react-native';
 import * as SecureStore from 'expo-secure-store';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { StorageKey } from '@/types';
+import { StorageKey } from '../types';
 
 /**
  * Secure storage wrapper for cross-platform compatibility

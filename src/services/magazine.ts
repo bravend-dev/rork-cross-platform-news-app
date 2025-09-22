@@ -1,5 +1,5 @@
 import { apiService, API_ENDPOINTS, getPaginatedData } from './api';
-import { Magazine, PaginatedResponse, ApiResponse } from '@/types';
+import { Magazine, PaginatedResponse, ApiResponse } from '../types';
 
 /**
  * Magazine service for handling magazine-related API calls

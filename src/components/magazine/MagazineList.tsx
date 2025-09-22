@@ -7,8 +7,8 @@ import {
   RefreshControl,
   ListRenderItem,
 } from 'react-native';
-import { Magazine } from '@/types';
-import { theme } from '@/constants/theme';
+import { Magazine } from '../../types';
+import { theme } from '../../constants/theme';
 import { MagazineCard } from './MagazineCard';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
 

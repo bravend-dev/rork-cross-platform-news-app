@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import createContextHook from '@nkzw/create-context-hook';
-import { authService } from '@/services/auth';
-import { User, Profile, ServicePlan, AuthState, AuthActions } from '@/types';
+import { authService } from '../services/auth';
+import { User, Profile, ServicePlan, AuthState, AuthActions } from '../types';
 
 /**
  * Enhanced Auth Context with better error handling and type safety

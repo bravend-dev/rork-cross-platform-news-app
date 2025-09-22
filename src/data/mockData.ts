@@ -1,4 +1,4 @@
-import { Magazine, SocialLink } from '@/types';
+import { Magazine, SocialLink } from '../types';
 
 /**
  * Mock data for development and testing

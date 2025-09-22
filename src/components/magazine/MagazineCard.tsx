@@ -8,9 +8,9 @@ import {
   ViewStyle,
 } from 'react-native';
 import { router } from 'expo-router';
-import { Magazine } from '@/types';
-import { theme } from '@/constants/theme';
-import { formatDate } from '@/utils/helpers';
+import { Magazine } from '../../types';
+import { theme } from '../../constants/theme';
+import { formatDate } from '../../utils/helpers';
 
 interface MagazineCardProps {
   magazine: Magazine;

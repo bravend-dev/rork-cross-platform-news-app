@@ -1,5 +1,5 @@
-import { API_CONFIG } from '@/constants/config';
-import { ApiResponse, PaginatedResponse } from '@/types';
+import { API_CONFIG } from '../constants/config';
+import { ApiResponse, PaginatedResponse } from '../types';
 
 /**
  * Base API service with common functionality

@@ -1,7 +1,6 @@
 import { apiService, API_ENDPOINTS } from './api';
-import { secureStorage, storage } from '@/utils/storage';
-import { User, Profile, ServicePlan, LoginForm, STORAGE_KEYS } from '@/types';
-import { ApiResponse } from '@/types';
+import { secureStorage, storage } from '../utils/storage';
+import { User, Profile, ServicePlan, LoginForm, STORAGE_KEYS, ApiResponse } from '../types';
 
 /**
  * Authentication service

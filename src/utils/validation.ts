@@ -1,4 +1,4 @@
-import { VALIDATION } from '@/constants/config';
+import { VALIDATION } from '../constants/config';
 
 /**
  * Validation utilities for form inputs and data

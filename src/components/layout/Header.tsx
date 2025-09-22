@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import { router } from 'expo-router';
 import { ArrowLeft } from 'lucide-react-native';
-import { theme } from '@/constants/theme';
+import { theme } from '../../constants/theme';
 import { SafeAreaWrapper } from './SafeAreaWrapper';
 
 interface HeaderProps {

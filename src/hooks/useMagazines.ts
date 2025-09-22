@@ -1,6 +1,7 @@
 import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
-import { magazineService } from '@/services/magazine';
-import { PAGINATION } from '@/constants/config';
+import { magazineService } from '../services/magazine';
+import { PAGINATION } from '../constants/config';
+import { ApiResponse, PaginatedResponse, Magazine } from '../types';
 
 /**
  * Query keys for magazine-related queries
@@ -25,7 +26,7 @@ export const useMagazines = (page = 1, limit = PAGINATION.defaultLimit) => {
     queryKey: MAGAZINE_QUERY_KEYS.list(page, limit),
     queryFn: () => magazineService.getMagazines(page, limit),
     staleTime: 5 * 60 * 1000, // 5 minutes
-    keepPreviousData: true,
+    placeholderData: (previousData) => previousData,
   });
 };
 
@@ -35,8 +36,9 @@ export const useMagazines = (page = 1, limit = PAGINATION.defaultLimit) => {
 export const useInfiniteMagazines = (limit = PAGINATION.defaultLimit) => {
   return useInfiniteQuery({
     queryKey: [...MAGAZINE_QUERY_KEYS.lists(), 'infinite', limit],
-    queryFn: ({ pageParam = 1 }) => magazineService.getMagazines(pageParam, limit),
-    getNextPageParam: (lastPage) => {
+    queryFn: ({ pageParam = 1 }) => magazineService.getMagazines(pageParam as number, limit),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage: ApiResponse<PaginatedResponse<Magazine>>) => {
       if (!lastPage.success || !lastPage.data) return undefined;
       return lastPage.data.hasMore ? lastPage.data.page + 1 : undefined;
     },
@@ -87,7 +89,7 @@ export const useSearchMagazines = (query: string, page = 1, limit = PAGINATION.d
     queryFn: () => magazineService.searchMagazines(query, page, limit),
     enabled: query.trim().length > 0,
     staleTime: 5 * 60 * 1000, // 5 minutes
-    keepPreviousData: true,
+    placeholderData: (previousData) => previousData,
   });
 };
 
@@ -97,8 +99,9 @@ export const useSearchMagazines = (query: string, page = 1, limit = PAGINATION.d
 export const useInfiniteSearchMagazines = (query: string, limit = PAGINATION.defaultLimit) => {
   return useInfiniteQuery({
     queryKey: [...MAGAZINE_QUERY_KEYS.search(query), 'infinite', limit],
-    queryFn: ({ pageParam = 1 }) => magazineService.searchMagazines(query, pageParam, limit),
-    getNextPageParam: (lastPage) => {
+    queryFn: ({ pageParam = 1 }) => magazineService.searchMagazines(query, pageParam as number, limit),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage: ApiResponse<PaginatedResponse<Magazine>>) => {
       if (!lastPage.success || !lastPage.data) return undefined;
       return lastPage.data.hasMore ? lastPage.data.page + 1 : undefined;
     },
@@ -120,7 +123,7 @@ export const useMagazinesByCategory = (
     queryFn: () => magazineService.getMagazinesByCategory(category, page, limit),
     enabled: !!category,
     staleTime: 5 * 60 * 1000, // 5 minutes
-    keepPreviousData: true,
+    placeholderData: (previousData) => previousData,
   });
 };
 
@@ -131,8 +134,9 @@ export const useInfiniteMagazinesByCategory = (category: string, limit = PAGINAT
   return useInfiniteQuery({
     queryKey: [...MAGAZINE_QUERY_KEYS.category(category), 'infinite', limit],
     queryFn: ({ pageParam = 1 }) =>
-      magazineService.getMagazinesByCategory(category, pageParam, limit),
-    getNextPageParam: (lastPage) => {
+      magazineService.getMagazinesByCategory(category, pageParam as number, limit),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage: ApiResponse<PaginatedResponse<Magazine>>) => {
       if (!lastPage.success || !lastPage.data) return undefined;
       return lastPage.data.hasMore ? lastPage.data.page + 1 : undefined;
     },

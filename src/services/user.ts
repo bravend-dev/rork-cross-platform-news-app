@@ -1,6 +1,14 @@
 import { API } from './api';
 import { User, RegisterForm, UpdateProfileForm } from '../types';
-import { getDeviceFingerprint } from '../constants/config';
+import { getDeviceFingerprint, DATA_CONFIG } from '../constants/config';
+import { 
+  mockLogin, 
+  mockRegister, 
+  mockGetUserInfo, 
+  mockUpdateProfile, 
+  mockResetPassword, 
+  mockSignOut 
+} from '../data/mockData';
 
 /**
  * User service for handling user-related API calls
@@ -10,6 +18,11 @@ export class UserService {
    * Register new user
    */
   async register(email: string, password: string, username: string, fullName: string, fingerprint?: string): Promise<User | null> {
+    if (DATA_CONFIG.USE_MOCK_DATA) {
+      console.log('Using mock register');
+      return mockRegister(email, password, username, fullName);
+    }
+
     try {
       const deviceFingerprint = fingerprint || getDeviceFingerprint();
       const body = { email, password, username, fullname: fullName, fingerprint: deviceFingerprint };
@@ -25,6 +38,11 @@ export class UserService {
    * Login user
    */
   async login(email: string, password: string, fingerprint?: string): Promise<User | null> {
+    if (DATA_CONFIG.USE_MOCK_DATA) {
+      console.log('Using mock login');
+      return mockLogin(email, password);
+    }
+
     try {
       const deviceFingerprint = fingerprint || getDeviceFingerprint();
       const body = { email, password, fingerprint: deviceFingerprint };
@@ -40,6 +58,11 @@ export class UserService {
    * Get user info by token
    */
   async getInfo(token: string): Promise<User | null> {
+    if (DATA_CONFIG.USE_MOCK_DATA) {
+      console.log('Using mock get user info');
+      return mockGetUserInfo(token);
+    }
+
     try {
       const response = await API.post<{ data?: { user?: User } }>('users/post/info', {}, {
         headers: { Authorization: `Bearer ${token}` }
@@ -55,6 +78,11 @@ export class UserService {
    * Reset password
    */
   async resetPassword(email: string): Promise<any> {
+    if (DATA_CONFIG.USE_MOCK_DATA) {
+      console.log('Using mock reset password');
+      return mockResetPassword(email);
+    }
+
     try {
       const response = await API.post('users/post/reset-password', { email });
       return response;
@@ -68,6 +96,11 @@ export class UserService {
    * Update user profile
    */
   async updateProfile(token: string, profileData: UpdateProfileForm): Promise<User | null> {
+    if (DATA_CONFIG.USE_MOCK_DATA) {
+      console.log('Using mock update profile');
+      return mockUpdateProfile(token, profileData);
+    }
+
     try {
       const response = await API.post<{ data?: { user?: User } }>('users/post/update-profile', profileData, {
         headers: { Authorization: `Bearer ${token}` }
@@ -83,6 +116,11 @@ export class UserService {
    * Sign out user
    */
   async signOut(token: string): Promise<void> {
+    if (DATA_CONFIG.USE_MOCK_DATA) {
+      console.log('Using mock sign out');
+      return mockSignOut(token);
+    }
+
     try {
       await API.post('users/post/logout', {}, {
         headers: { Authorization: `Bearer ${token}` }

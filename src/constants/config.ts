@@ -1,3 +1,26 @@
+// Data source configuration - Toggle between mock and API data
+export const DATA_CONFIG = {
+  USE_MOCK_DATA: true, // Set to false when API is ready
+  MOCK_API_DELAY: {
+    SHORT: 400,
+    MEDIUM: 600,
+    LONG: 1000,
+  },
+} as const;
+
+// Mock data configuration
+export const MOCK_CONFIG = {
+  // Test credentials for mock login
+  TEST_CREDENTIALS: {
+    email: 'test@example.com',
+    password: 'password',
+  },
+  // Default pagination
+  DEFAULT_PAGE_SIZE: 10,
+  // Mock user token
+  MOCK_TOKEN: 'mock-jwt-token-12345',
+} as const;
+
 // App configuration constants
 export const APP_CONFIG = {
   name: 'Trí Thức & Cuộc Sống',

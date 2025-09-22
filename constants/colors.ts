@@ -1,18 +1,21 @@
-const tintColorLight = "#ff6b35";
+// Legacy colors file - use @/constants/theme instead
+import { theme } from '@/constants/theme';
+
+const tintColorLight = theme.colors.primary;
 
 export default {
   light: {
-    text: "#fff",
-    background: "#000",
+    text: theme.colors.text,
+    background: theme.colors.background,
     tint: tintColorLight,
-    tabIconDefault: "#666",
+    tabIconDefault: theme.colors.textDisabled,
     tabIconSelected: tintColorLight,
   },
   dark: {
-    text: "#fff",
-    background: "#000",
+    text: theme.colors.text,
+    background: theme.colors.background,
     tint: tintColorLight,
-    tabIconDefault: "#666",
+    tabIconDefault: theme.colors.textDisabled,
     tabIconSelected: tintColorLight,
   },
 };

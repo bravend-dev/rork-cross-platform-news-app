@@ -6,6 +6,8 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet } from "react-native";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
+import { theme } from "@/constants/theme";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -16,10 +18,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   headerStyle: {
-    backgroundColor: '#000'
+    backgroundColor: theme.colors.background,
   },
   headerTitleStyle: {
-    color: '#fff'
+    color: theme.colors.text,
   },
 });
 
@@ -28,8 +30,8 @@ const statusBarStyle = "light" as const;
 const stackScreenOptions = {
   headerBackTitle: "Quay lại",
   headerStyle: styles.headerStyle,
-  headerTintColor: '#fff',
-  headerTitleStyle: styles.headerTitleStyle
+  headerTintColor: theme.colors.text,
+  headerTitleStyle: styles.headerTitleStyle,
 };
 
 function RootLayoutNav() {
@@ -57,13 +59,15 @@ export default function RootLayout() {
   }, []);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <GestureHandlerRootView style={styles.container}>
-          <RootLayoutNav />
-        </GestureHandlerRootView>
-      </AuthProvider>
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <GestureHandlerRootView style={styles.container}>
+            <RootLayoutNav />
+          </GestureHandlerRootView>
+        </AuthProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
 

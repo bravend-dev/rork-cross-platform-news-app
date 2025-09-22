@@ -5,9 +5,9 @@ import React, { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet } from "react-native";
-import { AuthProvider } from "@/contexts/AuthContext";
-import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
-import { theme } from "@/constants/theme";
+import { AuthProvider } from "@/src/contexts/AuthContext";
+import { ErrorBoundary } from "@/src/components/ui/ErrorBoundary";
+import { theme } from "@/src/constants/theme";
 
 SplashScreen.preventAutoHideAsync();
 
